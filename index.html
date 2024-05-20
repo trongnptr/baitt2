@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculator</h1>
+    <form id="calcForm">
+        <label for="a">Number A:</label>
+        <input type="number" id="a" name="a" required>
+        <br><br>
+        <label for="b">Number B:</label>
+        <input type="number" id="b" name="b" required>
+        <br><br>
+        <button type="submit">Submit</button>
+    </form>
+    <div class="result" id="results"></div>
+    
+    <script>
+        document.getElementById('calcForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const a = parseFloat(document.getElementById('a').value);
+            const b = parseFloat(document.getElementById('b').value);
+
+            const urls = [
+                "/add",
+                "/subtract",
+                "/multiply",
+                "/divide"
+            ];
+
+            const fetchOptions = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ a, b })
+            };
+
+            try {
+                const [addRes, subRes, mulRes, divRes] = await Promise.all(
+                    urls.map(url => fetch(`http://127.0.0.1:8000${url}`, fetchOptions).then(res => res.json()))
+                );
+
+                document.getElementById('results').innerHTML = `
+                    <p>Addition: ${addRes.result}</p>
+                    <p>Subtraction: ${subRes.result}</p>
+                    <p>Multiplication: ${mulRes.result}</p>
+                    <p>Division: ${divRes.result}</p>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = '<p>An error occurred. Please try again.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
